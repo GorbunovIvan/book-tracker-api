@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: book-tracker-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/book-tracker-api
+    password: root
+    username: postgres
+  jpa:
+    show-sql: true
+    open-in-view: false
+#    hibernate:
+#      ddl-auto: update
