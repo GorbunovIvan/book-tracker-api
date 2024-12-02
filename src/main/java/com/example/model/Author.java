@@ -5,12 +5,23 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(
         name = "authors",
         uniqueConstraints = @UniqueConstraint(columnNames = { "name" })
+)
+@NamedEntityGraph(
+        name = "graph.AuthorBooksCategories",
+        attributeNodes = @NamedAttributeNode(value = "books", subgraph = "subgraph.book"),
+        subgraphs = {
+                @NamedSubgraph(name = "subgraph.book", attributeNodes = {
+                        @NamedAttributeNode(value = "authors"),
+                        @NamedAttributeNode(value = "categories")
+                })
+        }
 )
 @NoArgsConstructor @AllArgsConstructor
 @Getter @Setter
@@ -29,5 +40,5 @@ public class Author {
 
     @ManyToMany(mappedBy = "authors")
     @ToString.Exclude
-    private List<Book> books;
+    private Set<Book> books = new HashSet<>();
 }
