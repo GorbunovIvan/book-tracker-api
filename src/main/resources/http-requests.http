@@ -1,0 +1,119 @@
+# /auth
+###
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+###
+POST http://localhost:8080/auth/check-token
+Content-Type: text/plain
+
+eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+
+###
+POST http://localhost:8080/auth/logout
+
+#/api/v1/books
+###
+GET http://localhost:8080/api/v1/books
+
+###
+GET http://localhost:8080/api/v1/books/2
+
+###
+GET http://localhost:8080/api/v1/books/title/book-1
+
+###
+GET http://localhost:8080/api/v1/books/category/science
+
+###
+GET http://localhost:8080/api/v1/books/author/author-3
+
+###
+POST http://localhost:8080/api/v1/books
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "title": "book-5",
+  "publishedAt": "2004-05-28",
+  "totalPages": 432,
+  "categories": [ { "name": "blockbuster" }, { "name": "science2" } ],
+  "authors": [ { "name": "author-6" }, { "name": "author-3" } ]
+}
+
+###
+PUT http://localhost:8080/api/v1/books/1
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "title": "book-1-updated-2",
+  "publishedAt": "2013-01-24",
+  "totalPages": 1235
+}
+
+###
+PUT http://localhost:8080/api/v1/books/2
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "title": "book-2-updated",
+  "publishedAt": "2012-01-24",
+  "totalPages": 32
+}
+
+###
+PUT http://localhost:8080/api/v1/books/1/add-category
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "name": "science32"
+}
+
+###
+DELETE http://localhost:8080/api/v1/books/1/delete-category
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "name": "science32"
+}
+
+###
+PUT http://localhost:8080/api/v1/books/1/update-categories
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+[ { "name": "cat-1" }, { "name": "science" } ]
+
+###
+PUT http://localhost:8080/api/v1/books/2/add-author
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "name": "author-63"
+}
+
+###
+DELETE http://localhost:8080/api/v1/books/2/delete-author
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+{
+  "name": "author-63"
+}
+
+###
+PUT http://localhost:8080/api/v1/books/1/update-authors
+Authorization: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImlhdCI6MTczMzY0MTU3MSwiZXhwIjoxNzMzNjQ1MTcxfQ.QUMhXEUeVGfjYyrhHh_D06UyF82Uxb3o2E1jda-xbmrPFRwfAlkSYlbuZk1Rg0RU
+Content-Type: application/json
+
+[ { "name": "author-3" }, { "name": "author-2" } ]

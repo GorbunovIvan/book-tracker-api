@@ -11,3 +11,12 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+security:
+  jwt:
+    requestHeader: authorization
+    secretKey: mySecretKey-mySecretKey-mySecretKey
+    validity: 3600 # in seconds
+  default-users:
+    admin:
+      username: admin
+      password: admin
