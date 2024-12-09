@@ -14,8 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -55,6 +54,19 @@ class BookServiceTest {
         assertEquals(bookDTO, bookReceived);
 
         verify(bookRepository, times(1)).findById(book.getId());
+    }
+
+    @Test
+    void shouldReturnNullWhenGetBookById() {
+
+        var bookId = 32L;
+
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        var bookReceived = bookService.getById(bookId);
+        assertNull(bookReceived);
+
+        verify(bookRepository, times(1)).findById(bookId);
     }
 
     @Test

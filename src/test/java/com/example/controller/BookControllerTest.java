@@ -4,11 +4,16 @@ import com.example.api.request.AuthorRequestDTO;
 import com.example.api.request.BookRequestDTO;
 import com.example.api.request.CategoryRequestDTO;
 import com.example.api.response.BookResponseDTO;
+import com.example.model.Role;
+import com.example.model.User;
+import com.example.security.JwtTokenProvider;
 import com.example.service.BookServicesFacade;
+import com.example.service.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,9 +48,51 @@ class BookControllerTest {
 
     private final EasyRandom easyRandom = new EasyRandom();
 
+    @MockitoBean
+    private UserService userService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+    private User testUser;
+    private String token;
+
     @PostConstruct
     private void init() {
         objectMapper.findAndRegisterModules();
+        testUser = new User(1, "test-user", "test-password", Role.ADMIN);
+        token = jwtTokenProvider.createToken(testUser.getUsername(), testUser.getAuthorities());
+    }
+
+    @BeforeEach
+    void setUp() {
+        when(userService.loadUserByUsername(testUser.getUsername())).thenReturn(testUser);
+    }
+
+    @Test
+    void shouldReturnForbiddenWhenCreateBook() throws Exception {
+
+        var bookRequest = easyRandom.nextObject(BookRequestDTO.class);
+        var bookJsonParam = objectMapper.writeValueAsString(bookRequest);
+
+        mockMvc.perform(post(baseURI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookJsonParam))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenCreateBook() throws Exception {
+
+        var bookRequest = easyRandom.nextObject(BookRequestDTO.class);
+        var bookJsonParam = objectMapper.writeValueAsString(bookRequest);
+
+        var wrongToken = token + "1";
+
+        mockMvc.perform(post(baseURI)
+                        .header("Authorization", wrongToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bookJsonParam))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -55,7 +102,8 @@ class BookControllerTest {
 
         when(bookService.getAllBooks()).thenReturn(books);
 
-        var jsonResponse = mockMvc.perform(get(baseURI))
+        var jsonResponse = mockMvc.perform(get(baseURI)
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -76,7 +124,8 @@ class BookControllerTest {
 
         when(bookService.getBookById(book.getId())).thenReturn(book);
 
-        var jsonResponse = mockMvc.perform(get(baseURI + "/{id}", book.getId()))
+        var jsonResponse = mockMvc.perform(get(baseURI + "/{id}", book.getId())
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -109,7 +158,8 @@ class BookControllerTest {
 
         when(bookService.getBookByTitle(book.getTitle())).thenReturn(book);
 
-        var jsonResponse = mockMvc.perform(get(baseURI + "/title/{title}", book.getTitle()))
+        var jsonResponse = mockMvc.perform(get(baseURI + "/title/{title}", book.getTitle())
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -128,7 +178,8 @@ class BookControllerTest {
 
         when(bookService.getBookByTitle(bookTitle)).thenReturn(null);
 
-        mockMvc.perform(get(baseURI + "/title/{title}", bookTitle))
+        mockMvc.perform(get(baseURI + "/title/{title}", bookTitle)
+                        .header("Authorization", token))
                 .andExpect(status().isNotFound());
 
         verify(bookService, times(1)).getBookByTitle(bookTitle);
@@ -142,7 +193,8 @@ class BookControllerTest {
 
         when(bookService.getBooksByCategory(categoryName)).thenReturn(books);
 
-        var jsonResponse = mockMvc.perform(get(baseURI + "/category/{category}", categoryName))
+        var jsonResponse = mockMvc.perform(get(baseURI + "/category/{category}", categoryName)
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -162,7 +214,8 @@ class BookControllerTest {
 
         when(bookService.getBooksByAuthor(authorName)).thenReturn(books);
 
-        var jsonResponse = mockMvc.perform(get(baseURI + "/author/{author}", authorName))
+        var jsonResponse = mockMvc.perform(get(baseURI + "/author/{author}", authorName)
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -185,6 +238,7 @@ class BookControllerTest {
         var bookJsonParam = objectMapper.writeValueAsString(bookRequest);
 
         var jsonResponse = mockMvc.perform(post(baseURI)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(bookJsonParam))
                 .andExpect(status().isOk())
@@ -211,6 +265,7 @@ class BookControllerTest {
         var bookJsonParam = objectMapper.writeValueAsString(bookRequest);
 
         var jsonResponse = mockMvc.perform(put(baseURI + "/{id}", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(bookJsonParam))
                 .andExpect(status().isOk())
@@ -227,7 +282,8 @@ class BookControllerTest {
     @Test
     void shouldDeleteBookWhenDeleteBookById() throws Exception {
         var bookId = 97L;
-        mockMvc.perform(delete(baseURI + "/{id}", bookId))
+        mockMvc.perform(delete(baseURI + "/{id}", bookId)
+                        .header("Authorization", token))
                 .andExpect(status().isAccepted());
         verify(bookService, times(1)).deleteBookById(bookId);
     }
@@ -241,6 +297,7 @@ class BookControllerTest {
         var categoryJsonParam = objectMapper.writeValueAsString(categoryDTO);
 
         mockMvc.perform(put(baseURI + "/{id}/add-category", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJsonParam))
                 .andExpect(status().isAccepted());
@@ -259,6 +316,7 @@ class BookControllerTest {
         var categoryJsonParam = objectMapper.writeValueAsString(categoryDTO);
 
         mockMvc.perform(delete(baseURI + "/{id}/delete-category", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJsonParam))
                 .andExpect(status().isOk())
@@ -278,6 +336,7 @@ class BookControllerTest {
         var categoryJsonParam = objectMapper.writeValueAsString(categoryDTO);
 
         mockMvc.perform(delete(baseURI + "/{id}/delete-category", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoryJsonParam))
                 .andExpect(status().isNotFound());
@@ -294,6 +353,7 @@ class BookControllerTest {
         var categoriesJsonParam = objectMapper.writeValueAsString(categoriesDTO);
 
         mockMvc.perform(put(baseURI + "/{id}/update-categories", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(categoriesJsonParam))
                 .andExpect(status().isAccepted());
@@ -310,6 +370,7 @@ class BookControllerTest {
         var authorJsonParam = objectMapper.writeValueAsString(authorDTO);
 
         mockMvc.perform(put(baseURI + "/{id}/add-author", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(authorJsonParam))
                 .andExpect(status().isAccepted());
@@ -328,6 +389,7 @@ class BookControllerTest {
         var authorJsonParam = objectMapper.writeValueAsString(authorDTO);
 
         mockMvc.perform(delete(baseURI + "/{id}/delete-author", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(authorJsonParam))
                 .andExpect(status().isOk())
@@ -347,6 +409,7 @@ class BookControllerTest {
         var authorJsonParam = objectMapper.writeValueAsString(authorDTO);
 
         mockMvc.perform(delete(baseURI + "/{id}/delete-author", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(authorJsonParam))
                 .andExpect(status().isNotFound());
@@ -363,6 +426,7 @@ class BookControllerTest {
         var authorsJsonParam = objectMapper.writeValueAsString(authorsDTO);
 
         mockMvc.perform(put(baseURI + "/{id}/update-authors", bookId)
+                        .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(authorsJsonParam))
                 .andExpect(status().isAccepted());
